@@ -120,28 +120,26 @@ def backtest(df_test, model, X_test, threshold, stop_loss=0.02, take_profit=0.04
 
     # Loop through the test data to simulate trades
     for i in range(len(df_test) - 1):
-        if position == 0 and df_test['signal'].iloc[i] == 1:
+        # Use .iat for scalar access
+        if position == 0 and df_test['signal'].iat[i] == 1:
             # Enter a new position on the next day's open
             position = 1
-            entry_price = df_test['Open'].iloc[i + 1]
+            # Use .iat for scalar access
+            entry_price = df_test['Open'].iat[i + 1]
         
         elif position == 1:
-            # Check for stop-loss or take-profit during the day
-            if df_test['Low'].iloc[i + 1] <= entry_price * (1 - stop_loss):
+            # Use .iat for scalar access for stop-loss check
+            if df_test['Low'].iat[i + 1] <= entry_price * (1 - stop_loss):
                 # Stop-loss triggered
                 exit_price = entry_price * (1 - stop_loss)
                 df_test.loc[df_test.index[i + 1], 'strategy_return'] = (exit_price / entry_price) - 1
                 position = 0
-            elif df_test['High'].iloc[i + 1] >= entry_price * (1 + take_profit):
+            # Use .iat for scalar access for take-profit check
+            elif df_test['High'].iat[i + 1] >= entry_price * (1 + take_profit):
                 # Take-profit triggered
                 exit_price = entry_price * (1 + take_profit)
                 df_test.loc[df_test.index[i + 1], 'strategy_return'] = (exit_price / entry_price) - 1
                 position = 0
-            # Optional: Exit if signal turns to 0 (hold until next signal)
-            # elif df_test['signal'].iloc[i] == 0:
-            #     exit_price = df_test['Open'].iloc[i+1]
-            #     df_test.loc[df_test.index[i+1], 'strategy_return'] = (exit_price / entry_price) - 1
-            #     position = 0
 
     # --- Calculate Returns and Metrics ---
     
@@ -184,7 +182,7 @@ def backtest(df_test, model, X_test, threshold, stop_loss=0.02, take_profit=0.04
         logging.info(f"Total Trades: {total_trades}")
     else:
         logging.info("Sharpe Ratio: 0.00 (No trades were made)")
-
+        
 def run_pipeline(ticker='AAPL', start='2023-01-01', end='2024-12-31'):
     logging.info(f"\n--- Running ML Trading Strategy for {ticker} ---")
     df = download_data(ticker, start, end)
