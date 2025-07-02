@@ -39,9 +39,12 @@ def add_features(df, feature_config):
     """
     Adds technical indicators to the dataframe based on a configuration.
     """
-    close = df['Close']
-    high = df['High']
-    low = df['Low']
+    # Defensive fix to ensure data is 1-dimensional
+    close = df['Close'].squeeze()
+    high = df['High'].squeeze()
+    low = df['Low'].squeeze()
+    print("Type of 'close' variable:", type(close))
+    print("Shape of 'close' variable:", close.shape)
 
     # --- Feature Calculations ---
     if 'rsi' in feature_config:
@@ -181,7 +184,7 @@ def backtest(df_test, model, X_test, threshold, stop_loss=0.02, take_profit=0.04
         logging.info(f"Total Trades: {total_trades}")
     else:
         logging.info("Sharpe Ratio: 0.00 (No trades were made)")
-        
+
 def run_pipeline(ticker='AAPL', start='2023-01-01', end='2024-12-31'):
     logging.info(f"\n--- Running ML Trading Strategy for {ticker} ---")
     df = download_data(ticker, start, end)
